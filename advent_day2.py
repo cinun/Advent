@@ -1,101 +1,147 @@
-# Copyright 2024 Yathartha Regmi
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# 
-#     https://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 class Solution:
     def __init__(self):
         print("Day 2 on the books")
-        self.dampner_list = []
-
+        self.dampener_list = []  # Corrected spelling from 'dampner_list' to 'dampener_list'
 
     def calculator(self, values):
-        order = int(values[1]) - int(values[0]) # Might be +ve or -ve based on the order
+        """
+        Processes a list of string values by converting them to integers and applying specific logic.
+
+        Args:
+            values (List[str]): A list of string representations of integers.
+
+        Returns:
+            int: Returns 1 if the processing is successful based on the logic; otherwise, returns 0.
+        """
+        if len(values) < 2:
+            print("Error: At least two values are required for calculation.")
+            return 0
+
+        try:
+            order = int(values[1]) - int(values[0])  # Determine the initial order
+        except ValueError as e:
+            print(f"ValueError: {e} in values {values}")
+            return 0
+
         stack = []
         for v in values:
-            v = int(v)
+            try:
+                num = int(v)
+            except ValueError as e:
+                print(f"ValueError: {e} for value '{v}'")
+                return 0
+
             if not stack:
-                stack.append(v)
-            else: # Gave up on comments aftter this
-                res = stack[-1] - v
-                if (abs(res) >= 1 and abs(res) <= 3):
-                    if order > 0:
-                        if v < stack[-1]:
-                           return 0
-                    elif order < 0:
-                        if v > stack[-1]:
-                            return 0
-                    stack.append(v)
-                else:
+                stack.append(num)
+                continue
+
+            difference = stack[-1] - num
+            abs_diff = abs(difference)
+
+            if 1 <= abs_diff <= 3:
+                if order > 0 and num < stack[-1]:
+                    print(f"Order > 0 but current number {num} is less than previous {stack[-1]}.")
                     return 0
+                elif order < 0 and num > stack[-1]:
+                    print(f"Order < 0 but current number {num} is greater than previous {stack[-1]}.")
+                    return 0
+                stack.append(num)
+            else:
+                print(f"Difference {abs_diff} out of range (1-3) between {stack[-1]} and {num}.")
+                return 0
+
         return 1
 
-
     def helper(self, line):
-        values = line.strip("\n").split(" ")
-        result = self.calculator(values)
+        """
+        Processes a single line by splitting it into values and passing them to the calculator.
 
+        Args:
+            line (str): A single line from the input file.
+
+        Returns:
+            int: Result from the calculator (1 or 0).
+        """
+        values = line.strip().split()
+        result = self.calculator(values)
         return result
-    
-    def helper_two(self, line): # If you need comments you need to get good
-        values = line.strip("\n").split(" ")
+
+    def helper_two(self, line):
+        """
+        Attempts to find if removing any single value from the line results in a successful calculation.
+
+        Args:
+            line (str): A single line from the input file.
+
+        Returns:
+            int: Returns 1 if any removal leads to a successful calculation; otherwise, returns 0.
+        """
+        values = line.strip().split()
+
         for i in range(len(values)):
-            new_list = values[:i] + values[i+1:]
+            new_list = values[:i] + values[i + 1:]
             if self.calculator(new_list) == 1:
                 return 1
-        return 0 
+        return 0
 
-    
     def line_generator(self, filename):
-        with open(filename, "r") as fr:
-            while True:
-                line = fr.readline() # Efficiency pt. 2
-                if not line:  # End of file is reached
-                    break
-                yield line  # Yield the line read from the file
-    
+        """
+        Generator that yields lines from a file one at a time.
+
+        Args:
+            filename (str): Path to the input file.
+
+        Yields:
+            str: Next line from the file.
+        """
+        try:
+            with open(filename, "r") as file:
+                for line in file:
+                    yield line
+        except FileNotFoundError:
+            print(f"Error: File '{filename}' not found.")
+            return
+
     def solver(self, filename):
-        self.answer = 0
+        """
+        Processes each line in the file using the helper method.
+        Collects lines that do not pass the calculator into dampener_list and sums the results.
+
+        Args:
+            filename (str): Path to the input file.
+
+        Returns:
+            int: Total sum of successful calculations.
+        """
+        total = 0
         for line in self.line_generator(filename):
             result = self.helper(line)
             if result != 1:
-                self.dampner_list.append(line)
-            self.answer += result
- 
-        return self.answer
+                self.dampener_list.append(line.strip())
+            total += result
+        return total
 
     def solver_two(self):
-        self.answer = 0
-        print(len(self.dampner_list))
-        for line in self.dampner_list:
-            result = self.helper_two(line)
-            self.answer += result
- 
-        return self.answer
+        """
+        Processes the dampener_list using helper_two to attempt corrections and sum the results.
 
-    
+        Returns:
+            int: Total sum of successful calculations after corrections.
+        """
+        total = 0
+        print(f"Number of dampened lines: {len(self.dampener_list)}")
+        for line in self.dampener_list:
+            result = self.helper_two(line)
+            total += result
+        return total
+
 
 def main():
-    solve = Solution()
-    ans = solve.solver("data.txt")
-    ans2 = solve.solver_two() + ans
-
-    
-    print(f"Part 2: {ans2}")
+    solution = Solution()
+    initial_answer = solution.solver("data.txt")
+    corrected_answer = solution.solver_two() + initial_answer
+    print(f"Part 2: {corrected_answer}")
 
 
 if __name__ == "__main__":
     main()
-
-
-
