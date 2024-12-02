@@ -49,7 +49,7 @@ class Solution:
     
     def helper_two(self, line): # If you need comments you need to get good
         values = line.strip("\n").split(" ")
-        for i in range(6):
+        for i in range(len(values)):
             new_list = values[:i] + values[i+1:]
             if self.calculator(new_list) == 1:
                 return 1
@@ -90,6 +90,7 @@ def main():
     ans = solve.solver("data.txt")
     ans2 = solve.solver_two() + ans
 
+    
     print(f"Part 2: {ans2}")
 
 

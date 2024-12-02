@@ -22,8 +22,6 @@ class Solver:
             similar += n * right_dict.get(n, 0)
         
         return similar
-        
-
 
     # Heaps is the way to go
     def part_one(self, filename):
