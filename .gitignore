@@ -3,6 +3,8 @@
 
 # Allow .py files
 !*.py
+!Day_3
+!Day_4
 
 # Ignore all .txt files
 *.txt
