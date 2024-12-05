@@ -1,6 +1,3 @@
-
-# from collections import deque 
-
 class Solution:
 
     def __str__(self):
@@ -11,7 +8,7 @@ class Solution:
         return result
 
     def __init__(self):
-        print("Day 3 here I come")
+        print("Day 4 here I come")
         self.graph = []
         self.R, self.C = 10, 10
         up, down = (-1, 0), (1, 0)
@@ -19,10 +16,11 @@ class Solution:
         diag_left_up, diag_right_up = (-1, -1), (-1, 1)
         diag_left_down, diag_right_down = (1, -1), (1, 1)
         self.directions = [up, down, left, right, diag_left_up, diag_right_up, diag_left_down, diag_right_down]
-        self.cache = {} # To store the path that has been visited already
-        # self.pattern = {"X": 1, "M": 2, "A": 3, "S": 4}
-        # self.milo = {0: "X", 1: "M", 2: "A", 3: "S"}
+        self.dir_two = [diag_left_down, diag_right_down, diag_left_up, diag_right_up]
+
+        self.temp_graph = [[False for i in range(self.C)] for _ in range(self.R)]
         self.milo = ["X", "M", "A", "S"]
+        self.milo_two = ["M", "A", "S"]
 
     def line_generator(self, filename):
         """
@@ -40,62 +38,61 @@ class Solution:
                     yield line.strip("\n")
         except FileNotFoundError:
             print(f"Error: File '{filename}' not found.")
-            return
-    
-    # def bfs(self, row, col, visited, count):
-
-    #     queue = deque()
-    #     queue.append((row, col))
-    #     result = 0 
-    #     visited.add((row, col))
-
-    #     while queue:
-    #         r, c = queue.popleft()
-
-    #         for x, y in self.directions:
-    #             nx, ny = r + x, y + c
-
-    #             if 0 <= nx < self.R and 0 <= ny < self.C:
-    #                 result += 
 
 
-    def dfs(self, row, col, visited, count, path): # dfs might be better 
-        if row < 0 or row >= self.R or col < 0 or col >= self.C:
-            return 0
+    def path_finder_two(self, row, col, direction):
+        intersection = False
+        path = []
+        for i in range(1, 3):
+            nx, ny = row + direction[0] * i, col + direction[1] * i # Cuz im smart like that
         
-        if self.graph[row][col] == "#":
-            return 0 
+            if (nx < 0 or nx >= self.R) or (ny < 0 or ny >= self.C):
+                return False
 
-        if count < len(self.milo) and self.milo[count] != self.graph[row][col]:
-            return 0
+            if self.graph[nx][ny] != self.milo[i]:
+                return False
+            path.append((nx, ny))
+        
 
-        if count == len(self.milo) - 1:
-            print(f"Path Found: {path}")
-            return 1
+        for r, c in path:
+            if self.temp_graph[r][c] == True:
+                intersection = True
+            self.temp_graph[r][c] = True
+ 
+        return intersection
 
-        result = 0 
-        # visited.add((row, col))
-        cur = self.graph[row][col]
-        self.graph[row][col] = "#"
-        for i, j in self.directions:
-            nx, ny = row + i, col + j
-            # print(self.graph[nx][ny])
-            if 0 <= nx < self.R and 0 <= ny < self.C:
-                result += self.dfs(row+i, col+j, visited, count+1, path + self.graph[nx][ny])
-            
-        # visited.remove((row, col))
-        self.graph[row][col] = cur
-        return result
+    def path_finder(self, row, col, direction):
 
+        for i in range(1, 4):
+            nx, ny = row + direction[0] * i, col + direction[1] * i # Cuz im smart like that
+        
+            if (nx < 0 or nx >= self.R) or (ny < 0 or ny >= self.C):
+                return False
 
+            if self.graph[nx][ny] != self.milo[i]:
+                return False
+        
+        return True
+    
     def helper(self):
         ans = 0
         for i in range(self.R):
             for j in range(self.C):
-                if self.graph[i][j] == 'X':
-                    visited = set()
-                    ans += self.dfs(i, j, visited, 0, "X")
-        
+                if self.graph[i][j] == "X":
+                    for d in self.directions:
+                        if self.path_finder(i, j, d):
+                            ans += 1
+        return ans
+    
+    def helper_two(self):
+        ans = 0
+        for i in range(self.R):
+            for j in range(self.C):
+                if self.graph[i][j] == "M":
+                    for d in self.dir_two:
+                        if self.path_finder_two(i, j, d):
+                            ans += 1
+
         return ans
 
     def graph_generator(self, line):
@@ -104,21 +101,36 @@ class Solution:
 
     
     def part_one_solver(self, filename):
-        
         for line in self.line_generator(filename):
+            line = line.strip()
             self.graph_generator(line)
+
+        # print(self.graph)
+        for l in self.temp_graph:
+            print(l)
+        return self.helper()
+
+    def part_two_solver(self, filename):
+        self.graph = []
+        for line in self.line_generator(filename):
+            line = line.strip()
+            self.graph_generator(line)
+
+        # print(self.graph)
         
-        print(self.graph)
-        result = 0 
-        result = self.helper()
-        
+        result = self.helper_two()
+        for l in self.temp_graph:
+            print(l)
         return result
 
 def main(*args, **kwargs):
     solution = Solution()
     filename = "../data.txt"
     print(solution.part_one_solver(filename))
+    print(solution.part_two_solver(filename))
+    
 
 
 if __name__ == "__main__":
     main()
+
