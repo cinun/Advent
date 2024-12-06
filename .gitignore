@@ -5,7 +5,8 @@
 !*.py
 !Day_3
 !Day_4
-
+!Day_5
+!Day_6
 # Ignore all .txt files
 *.txt
 
